@@ -3,9 +3,12 @@ package ${package.Entity};
 <#list table.importPackages as pkg>
 import ${pkg};
 </#list>
+import com.baomidou.mybatisplus.annotation.*;
 <#if swagger2>
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+<#--import io.swagger.annotations.ApiModel;-->
+<#--import io.swagger.annotations.ApiModelProperty;-->
+<#-- ----------  使用swagger2开关实际上配置的是swagger3的注解  ---------->
+import io.swagger.v3.oas.annotations.media.Schema;
 </#if>
 <#if entityLombokModel>
 import lombok.Data;
@@ -34,10 +37,13 @@ import lombok.experimental.Accessors;
 @TableName("${table.name}")
 </#if>
 <#if swagger2>
-@ApiModel(value="${entity}对象", description="${table.comment!}")
+<#-- ----------  使用swagger2开关实际上配置的是swagger3的注解  ---------->
+<#--@ApiModel(value="${entity}对象", description="${table.comment!}")-->
+@TableName("${table.name}")
+@Schema(description="${table.comment!}")
 </#if>
 <#if superEntityClass??>
-public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}></#if> {
+public class ${entity} extends ${superEntityClass}<${entity}><#if activeRecord><${entity}></#if> {
 <#elseif activeRecord>
 public class ${entity} extends Model<${entity}> {
 <#else>
@@ -55,7 +61,9 @@ public class ${entity} implements Serializable {
 
     <#if field.comment!?length gt 0>
         <#if swagger2>
-    @ApiModelProperty(value = "${field.comment}")
+    <#-- ----------  使用swagger2开关实际上配置的是swagger3的注解  ---------->
+<#--    @ApiModelProperty(value = "${field.comment}")-->
+    @Schema(description = "${field.comment}")
         <#else>
     /**
      * ${field.comment}
@@ -80,7 +88,9 @@ public class ${entity} implements Serializable {
     @TableField(fill = FieldFill.${field.fill})
         </#if>
     <#elseif field.convert>
-    @TableField("${field.name}")
+<#--    @TableField("${field.name}")-->
+    <#--    配置更新策略        -->
+    @TableField(value = "${field.name}", updateStrategy = FieldStrategy.NOT_EMPTY)
     </#if>
     <#-- 乐观锁注解 -->
     <#if (versionFieldName!"") == field.name>
